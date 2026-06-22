@@ -1,6 +1,6 @@
+# Ambientes e Segredos
 .env
 .env.*
-
 
 node_modules/
 dist/
