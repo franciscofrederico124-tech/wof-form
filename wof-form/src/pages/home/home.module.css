@@ -1,0 +1,14 @@
+.home {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    width: 100dvw;
+    background: linear-gradient(135deg, blue 50%, darkblue 50%);
+}
+.main {
+    width: 100dvw;
+    height: auto;
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 50%);
+}
