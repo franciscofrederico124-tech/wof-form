@@ -1,129 +1,147 @@
-import style from "./card_form.module.css"
+import { useState } from "react";
+import register from "../../services/register";
+import style from "./card_form.module.css";
 
 export default function CardForm() {
+
+    const [feedback, setFeedback] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [ok, setOk] = useState(false);
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+
+        setFeedback("");
+        setLoading(true);
+
+        const form = new FormData(e.target);
+        const data = Object.fromEntries(form);
+
+        const res = await register(data);
+
+        setLoading(false);
+
+        if (res.ok) {
+            setFeedback("Inscrição enviada com sucesso!");
+
+            setTimeout(() => {
+                setOk(true);
+            }, 1500);
+
+        } else {
+            setFeedback(res.message || "Erro ao enviar formulário");
+        }
+    }
+
     return (
-        <form autoComplete="off" className={style.card_form}>
-            <h2>Formulário de inscrição</h2>
-            
-            <span className={style.theme}>
-                Dados pessoais <i className="bi bi-person"></i>
-            </span>
-            
-            <section className={style.inputs}>
-                <div className={style.input}>
-                    <label><i className="bi bi-person"></i></label>
-                    <input type="text" placeholder="Primeiro nome" required />
-                </div>
-                
-                <div className={style.input}>
-                    <label><i className="bi bi-person"></i></label>
-                    <input type="text" placeholder="Último nome" required />
-                </div>
+        <form
+            autoComplete="off"
+            className={style.card_form}
+            onSubmit={handleSubmit}
+        >
 
-                <div className={style.input}>
-                    <label><i className="bi bi-gender-ambiguous"></i></label>
-                    <select defaultValue="" required>
-                        <option value="" disabled hidden>Sexo</option>
-                        <option value="masculino">Masculino</option>
-                        <option value="feminino">Feminino</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
-                
-                <div className={style.input}>
-                    <label><i className="bi bi-calendar-date"></i></label>
-                    <input type="date" required />
-                </div>
-                
-                <div className={style.input}>
-                    <label><i className="bi bi-envelope"></i></label>
-                    <input type="email" placeholder="E-mail (Opcional)" />
-                </div>
-                
-                <div className={style.input}>
-                    <label><i className="bi bi-telephone"></i></label>
-                    <input type="tel" placeholder="Telemóvel ( Whatsapp )" required />
-                </div>
-                
-                <span className={style.theme}>
-                    Dados académicos <i className="bi bi-book"></i>
-                </span>
-                
-                <div className={style.input}>
-                    <label><i className="bi bi-graph-up-arrow"></i></label>
-                    <select defaultValue="" required>
-                        <option value="" disabled hidden>Seu nível académico</option>
-                        <option value="primeiro_ciclo">Primeiro ciclo</option>
-                        <option value="ensino_medio">Ensino médio</option>
-                        <option value="universitario">Universitário</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
+            {!ok ? (
+                <>
+                    <h2>Formulário de inscrição</h2>
 
-                <div className={style.input}>
-                    <label><i className="bi bi-code-slash"></i></label>
-                    <select defaultValue="" required>
-                        <option value="" disabled hidden>Nível na programação</option>
-                        <option value="junior">Júnior</option>
-                        <option value="pleno">Pleno</option>
-                        <option value="senior">Sênior</option>
-                        <option value="outro">Outro</option>
-                    </select>
+                    <span className={style.theme}>
+                        Dados pessoais <i className="bi bi-person"></i>
+                    </span>
+
+                    <section className={style.inputs}>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-person"></i></label>
+                            <input name="first_name" type="text" required placeholder="Primeiro nome" />
+                        </div>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-person-badge"></i></label>
+                            <input name="last_name" type="text" required placeholder="Último nome" />
+                        </div>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-gender-ambiguous"></i></label>
+                            <select name="gender" defaultValue="" required>
+                                <option value="" disabled>Género</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="feminino">Feminino</option>
+                            </select>
+                        </div>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-calendar-date"></i></label>
+                            <input name="data" type="date" required />
+                        </div>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-envelope"></i></label>
+                            <input name="email" type="email" placeholder="Email (opcional)" />
+                        </div>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-telephone"></i></label>
+                            <input name="tel" type="tel" required placeholder="Telemóvel (WhatsApp)" />
+                        </div>
+
+                        <span className={style.theme}>
+                            Dados académicos <i className="bi bi-book"></i>
+                        </span>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-mortarboard"></i></label>
+                            <select name="course" defaultValue="" required>
+                                <option value="" disabled>Curso pretendido</option>
+                                <option value="slide">Criação de Slides, Oratória e Retórica</option>
+                                <option value="web">Desenvolvimento Web</option>
+                                <option value="iot">Desenvolvimento de sistemas IOT</option>
+                            </select>
+                        </div>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-mortarboard"></i></label>
+                            {/* CORRIGIDO: Alterado de degree_school para academic_level */}
+                            <select name="academic_level" defaultValue="" required>
+                                <option value="" disabled>Nível académico</option>
+                                <option value="medio">Médio</option>
+                                <option value="universitario">Universitário</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+
+                        <div className={style.input}>
+                            <label><i className="bi bi-code-slash"></i></label>
+                            <select name="level" defaultValue="" required>
+                                <option value="" disabled>Nível programação</option>
+                                <option value="junior">Júnior</option>
+                                <option value="pleno">Pleno</option>
+                                <option value="senior">Sénior</option>
+                            </select>
+                        </div>
+
+                    </section>
+
+                    {feedback && (
+                        <div className={style.feedback}>
+                            {feedback}
+                        </div>
+                    )}
+
+                    <button disabled={loading} className={style.submit_btn}>
+                        {loading ? "Enviando..." : "Concluir inscrição"}
+                    </button>
+                </>
+            ) : (
+                <div className={style.success}>
+                    <h2>
+                        Inscrição enviada <i className="bi bi-check-circle"></i>
+                    </h2>
+                    <span className={style.theme}>
+                        Tão logo, receberá um convite para se juntar à comunidade oficial
+                    </span>
                 </div>
+            )}
 
-                <span className={style.theme}>
-                    Dados do curso <i className="bi bi-mortarboard"></i>
-                </span>
-
-                <div className={style.input}>
-                    <label><i className="bi bi-journal-text"></i></label>
-                    <select defaultValue="" required>
-                        <option value="" disabled hidden>Qual curso vai fazer?</option>
-                        <option value="slides_apresentacoes">Criação de slides e apresentações</option>
-                        <option value="front_end">Desenvolvimento web front-end</option>
-                        <option value="iot">Desenvolvimento de sistemas de IoT</option>
-                    </select>
-                </div>
-
-                <div className={style.input}>
-                    <label><i className="bi bi-clock"></i></label>
-                    <select defaultValue="" required>
-                        <option value="" disabled hidden>Horário preferencial</option>
-                        <option value="manha">Manhã</option>
-                        <option value="tarde">Tarde</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
-
-                <div className={style.input}>
-                    <label><i className="bi bi-laptop"></i></label>
-                    <select defaultValue="" required>
-                        <option value="" disabled hidden>Tem algum dispositivo eletrónico?</option>
-                        <option value="sim">Sim</option>
-                        <option value="nao">Não</option>
-                    </select>
-                </div>
-
-                <div className={style.input}>
-                    <label><i className="bi bi-question-circle"></i></label>
-                    <select defaultValue="" required>
-                        <option value="" disabled hidden>Como ficou sabendo do curso?</option>
-                        <option value="redes_sociais">Redes sociais</option>
-                        <option value="anuncio">Anúncio</option>
-                        <option value="amigo">Um amigo</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
-            </section>
-
-            <label className={style.checkbox_container}>
-                <input type="checkbox" required />
-                <span>Aceito os termos e condições da inscrição</span>
-            </label>
-
-            <button type="submit" className={style.submit_btn}>
-                Concluir Inscrição
-            </button>
         </form>
-    )
+    );
 }
