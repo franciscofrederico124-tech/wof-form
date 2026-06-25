@@ -7,7 +7,7 @@ export default function CardForm() {
     const [loading, setLoading] = useState(false);
     const [ok, setOk] = useState(false);
 
-    async function handleSubmit(e) {
+    async function handleSubmit(e: any) {
         e.preventDefault();
 
         setFeedback("");
