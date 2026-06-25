@@ -5,19 +5,15 @@ const key = document.getElementById("key");
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
+
     const access_key = key.value;
-    
-    const data = {
-        access_key: access_key
-    }
+    const data = { access_key };
 
     btn.disabled = true;
     btn.textContent = "Verificando...";
     feedback.textContent = "";
 
     try {
-
         const res = await fetch("/system/access", {
             method: "POST",
             headers: {
@@ -28,22 +24,29 @@ form.addEventListener("submit", async (e) => {
         });
 
         const json = await res.json();
+        console.log(json);
 
-        if (json.ok) {
+        if (json.success) {
             feedback.className = "feedback success";
-            feedback.textContent = "Acesso autorizado";
+            feedback.textContent = json.message || "Acesso autorizado";
+
+            setTimeout(() => {
+                window.location.href = "/system/dashboard";
+            }, 1000);
+            return;
         } else {
             feedback.className = "feedback error";
             feedback.textContent = json.message || "Acesso negado";
         }
 
     } catch (err) {
+        console.log(err);
         feedback.className = "feedback error";
         feedback.textContent = "Erro de rede";
     }
 
     setTimeout(() => {
         btn.disabled = false;
-    btn.textContent = "Entrar";
-    }, 500)
+        btn.textContent = "Entrar";
+    }, 500);
 });

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Sistema</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/style/dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div>
+                <h1><i class="bi bi-mortarboard-fill"></i> Gestão de Inscrições</h1>
+                <p>Lista completa de estudantes registados no sistema</p>
+            </div>
+            <button id="resetDbBtn" class="btn-danger-reset">
+                <i class="bi bi-trash3-fill"></i> Limpar Dados
+            </button>
+        </header>
+
+        <main class="students-grid">
+            {{#each students}}
+            <div class="student-card" data-student="{{json this}}">
+                <div class="student-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="student-info">
+                    <h3>{{this.first_name}} {{this.last_name}}</h3>
+                    <p class="student-email"><i class="bi bi-envelope"></i> {{#if this.email}}{{this.email}}{{else}}Sem
+                        email{{/if}}</p>
+                    <p class="student-email" style="margin-top: 4px;"><i class="bi bi-telephone"></i> {{this.tel}}</p>
+                </div>
+                <div class="card-footer-info">
+                    <span class="view-badge">Ver ficha completa <i class="bi bi-arrow-right-short"></i></span>
+                </div>
+            </div>
+            {{else}}
+            <div class="empty-state">
+                <i class="bi bi-folder-x"></i>
+                <p>Nenhum registo encontrado na base de dados.</p>
+            </div>
+            {{/each}}
+        </main>
+    </div>
+
+    <div id="detailsModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2><i class="bi bi-person-vcard"></i> Ficha do Estudante</h2>
+                <button id="closeModal" class="close-btn"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                <div class="data-field">
+                    <label>ID do Registo</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-id" readonly>
+                        <button class="copy-btn" data-target="modal-id"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Nome</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-firstname" readonly>
+                        <button class="copy-btn" data-target="modal-firstname"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Apelido</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-lastname" readonly>
+                        <button class="copy-btn" data-target="modal-lastname"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Género</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-gender" readonly>
+                        <button class="copy-btn" data-target="modal-gender"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Data de Nascimento</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-birthdate" readonly>
+                        <button class="copy-btn" data-target="modal-birthdate"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Endereço de Email</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-email" readonly>
+                        <button class="copy-btn" data-target="modal-email"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Telemóvel / Telefone</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-tel" readonly>
+                        <button class="copy-btn" data-target="modal-tel"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Escola / Curso</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-school" readonly>
+                        <button class="copy-btn" data-target="modal-school"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Nível / Ano</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-level" readonly>
+                        <button class="copy-btn" data-target="modal-level"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Edições Realizadas</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-edits" readonly>
+                        <button class="copy-btn" data-target="modal-edits"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="data-field">
+                    <label>Data de Criação do Registo</label>
+                    <div class="input-group">
+                        <input type="text" id="modal-date" readonly>
+                        <button class="copy-btn" data-target="modal-date"><i class="bi bi-copy"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+
+</html>

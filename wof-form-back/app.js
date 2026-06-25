@@ -7,7 +7,9 @@ import { engine } from "express-handlebars";
 import init from "./src/routes/init.js";
 import register from "./src/routes/register.js";
 import access from "./src/routes/access.js";
+import dashboard from "./src/routes/dashboard.js";
 import login from "./src/routes/login.js";
+import reset from "./src/config/reset.js";
 import ping from "./src/routes/ping.js";
 
 dotenv.config();
@@ -41,6 +43,11 @@ app.engine(
     extname: ".hbs",
     defaultLayout: false,
     layoutsDir: false,
+    helpers: {
+      json: function (context) {
+        return JSON.stringify(context);
+      }
+    }
   })
 );
 app.use(express.static("public"));
@@ -52,6 +59,9 @@ app.get("/ping", ping);
 app.post("/register", register);
 app.get("/system/access", access);
 app.post("/system/access", login);
+
+app.get("/system/dashboard", dashboard);
+app.get("/system/reset_db", reset);
 
 (async () => {
   await init();

@@ -5,9 +5,9 @@ export default function login(req, res) {
     const {
         access_key
     } = req.body;
-    
+
     const access_key_local = process.env.ACCESS_KEY;
-    
+
     try {
         if (!access_key) {
             return res.status(400).json({
@@ -16,17 +16,23 @@ export default function login(req, res) {
                 message: "Insira a password! "
             })
         }
-        if (access_key.trim() !== access_key_local.trim())
-        {
+        if (access_key.trim() !== access_key_local.trim()) {
             return res.status(400).json({
                 success: false,
                 status: "error",
                 message: "Acesso negado! "
             });
-            
+
         }
-        
-        return res.redirect("/system/home");
+
+        req.session.authorized = true;
+
+        return res.status(200).json({
+            success: true,
+            status: "ok",
+            message: "Acesso concebido! ",
+            redirect: "/system/dashboard"
+        });
     }
     catch (error) {
         return res.status(500).json({

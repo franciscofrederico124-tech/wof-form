@@ -1,9 +1,7 @@
 import db from "../config/db.js";
 
 export default async function register(req, res) {
-
     try {
-
         if (!req.session) {
             return res.status(401).json({
                 ok: false,
@@ -18,7 +16,8 @@ export default async function register(req, res) {
             data,
             email,
             tel,
-            degree_school,
+            course,
+            academic_level,
             level
         } = req.body;
 
@@ -27,8 +26,10 @@ export default async function register(req, res) {
         gender = gender?.trim();
         email = email?.trim()?.toLowerCase();
         tel = tel?.replace(/[^\d+]/g, "");
-        degree_school = degree_school?.trim();
-        level = level?.trim();
+        
+        const degree_school = course?.trim();
+        const target_level = academic_level?.trim();
+        const programming_level = level?.trim();
 
         if (!first_name || first_name.length < 3) {
             return res.status(400).json({ ok: false, message: "Nome inválido" });
@@ -50,7 +51,6 @@ export default async function register(req, res) {
         }
 
         const phoneRegex = /^[0-9+]{9,15}$/;
-
         if (!tel || !phoneRegex.test(tel)) {
             return res.status(400).json({ ok: false, message: "Telefone inválido" });
         }
@@ -61,9 +61,7 @@ export default async function register(req, res) {
 
         const birth = new Date(data);
         const now = new Date();
-
         let age = now.getFullYear() - birth.getFullYear();
-
         const monthDiff = now.getMonth() - birth.getMonth();
 
         if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
@@ -74,13 +72,13 @@ export default async function register(req, res) {
             return res.status(400).json({ ok: false, message: "Idade mínima 10 anos" });
         }
 
-        if (!degree_school || !level) {
+        if (!degree_school || !target_level || !programming_level) {
             return res.status(400).json({ ok: false, message: "Dados académicos inválidos" });
         }
 
         const exists = await db.query(
             `
-            SELECT id
+            SELECT first_name, last_name, tel
             FROM registrations
             WHERE tel = $1
             OR (
@@ -92,11 +90,23 @@ export default async function register(req, res) {
             [tel, first_name, last_name]
         );
 
-        if (exists.rows.length) {
-            return res.status(409).json({
-                ok: false,
-                message: "Já existe registo com este nome ou número"
-            });
+        if (exists.rows.length > 0) {
+            const match = exists.rows[0];
+            
+            if (match.tel === tel) {
+                return res.status(409).json({
+                    ok: false,
+                    message: "Este número de telemóvel já está registado"
+                });
+            }
+            
+            if (match.first_name.toLowerCase() === first_name.toLowerCase() && 
+                match.last_name.toLowerCase() === last_name.toLowerCase()) {
+                return res.status(409).json({
+                    ok: false,
+                    message: "Já existe um estudante registado com este nome completo"
+                });
+            }
         }
 
         const inserted = await db.query(
@@ -113,7 +123,7 @@ export default async function register(req, res) {
                 level
             )
             VALUES
-            ($1,$2,$3,$4,$5,$6,$7,$8)
+            ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING id, first_name, last_name, tel
             `,
             [
@@ -124,7 +134,7 @@ export default async function register(req, res) {
                 email || null,
                 tel,
                 degree_school,
-                level
+                target_level
             ]
         );
 
@@ -142,7 +152,7 @@ export default async function register(req, res) {
         });
 
     } catch (err) {
-
+        console.error(err);
         return res.status(500).json({
             ok: false,
             message: "Erro interno do servidor"

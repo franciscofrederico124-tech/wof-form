@@ -3,7 +3,6 @@ import register from "../../services/register";
 import style from "./card_form.module.css";
 
 export default function CardForm() {
-
     const [feedback, setFeedback] = useState("");
     const [loading, setLoading] = useState(false);
     const [ok, setOk] = useState(false);
@@ -14,8 +13,19 @@ export default function CardForm() {
         setFeedback("");
         setLoading(true);
 
-        const form = new FormData(e.target);
-        const data = Object.fromEntries(form);
+        const formElements = e.target.elements;
+
+        const data = {
+            first_name: formElements.first_name.value,
+            last_name: formElements.last_name.value,
+            gender: formElements.gender.value,
+            data: formElements.data.value,
+            email: formElements.email.value || undefined,
+            tel: formElements.tel.value,
+            course: formElements.course.value,
+            academic_level: formElements.academic_level.value,
+            level: formElements.level.value
+        };
 
         const res = await register(data);
 
@@ -23,11 +33,9 @@ export default function CardForm() {
 
         if (res.ok) {
             setFeedback("Inscrição enviada com sucesso!");
-
             setTimeout(() => {
                 setOk(true);
             }, 1500);
-
         } else {
             setFeedback(res.message || "Erro ao enviar formulário");
         }
@@ -39,7 +47,6 @@ export default function CardForm() {
             className={style.card_form}
             onSubmit={handleSubmit}
         >
-
             {!ok ? (
                 <>
                     <h2>Formulário de inscrição</h2>
@@ -49,7 +56,6 @@ export default function CardForm() {
                     </span>
 
                     <section className={style.inputs}>
-
                         <div className={style.input}>
                             <label><i className="bi bi-person"></i></label>
                             <input name="first_name" type="text" required placeholder="Primeiro nome" />
@@ -100,7 +106,6 @@ export default function CardForm() {
 
                         <div className={style.input}>
                             <label><i className="bi bi-mortarboard"></i></label>
-                            {/* CORRIGIDO: Alterado de degree_school para academic_level */}
                             <select name="academic_level" defaultValue="" required>
                                 <option value="" disabled>Nível académico</option>
                                 <option value="medio">Médio</option>
@@ -118,7 +123,6 @@ export default function CardForm() {
                                 <option value="senior">Sénior</option>
                             </select>
                         </div>
-
                     </section>
 
                     {feedback && (
@@ -141,7 +145,6 @@ export default function CardForm() {
                     </span>
                 </div>
             )}
-
         </form>
     );
 }

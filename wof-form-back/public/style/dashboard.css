@@ -1,0 +1,265 @@
+:root {
+    --bg-primary: #f4f6f9;
+    --surface: #ffffff;
+    --text-main: #2d3748;
+    --text-muted: #718096;
+    --accent: #4f46e5;
+    --accent-light: #e0e7ff;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    padding: 2rem 1rem;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.dashboard-header p {
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.btn-danger-reset {
+    background-color: var(--danger);
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger-reset:hover {
+    background-color: var(--danger-hover);
+}
+
+.students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.student-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.student-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+}
+
+.student-avatar {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.student-info h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.student-email {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-footer-info {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+}
+
+.view-badge {
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 3rem;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+    padding: 1.5rem;
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.75rem;
+}
+
+.modal-header h2 {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.data-field {
+    margin-bottom: 1.25rem;
+}
+
+.data-field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.copy-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 42px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+.copy-btn.copied {
+    background: var(--success);
+    color: #ffffff;
+    border-color: var(--success);
+}
