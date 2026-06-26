@@ -107,7 +107,7 @@ export default function CardForm() {
                         <div className={style.input}>
                             <label><i className="bi bi-mortarboard"></i></label>
                             <select name="academic_level" defaultValue="" required>
-                                <option value="" disabled>Nível de experiência</option>
+                                <option value="" disabled>Nível académico</option>
                                 <option value="medio">Médio</option>
                                 <option value="universitario">Universitário</option>
                                 <option value="outro">Outro</option>
@@ -117,7 +117,7 @@ export default function CardForm() {
                         <div className={style.input}>
                             <label><i className="bi bi-code-slash"></i></label>
                             <select name="level" defaultValue="" required>
-                                <option value="" disabled>Nível programação</option>
+                                <option value="" disabled>Nível de experiência</option>
                                 <option value="junior">Júnior</option>
                                 <option value="pleno">Pleno</option>
                                 <option value="senior">Sénior</option>
