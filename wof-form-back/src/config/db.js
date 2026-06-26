@@ -4,25 +4,17 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const db = new Pool({
-    connectionString:
-        process.env.CONNECT_STRING_POSTGREE,
-
+    connectionString: process.env.CONNECT_STRING_POSTGREE,
     ssl: {
         rejectUnauthorized: false
-    }
-});
-
-db.on("connect", () => {
-    console.log(
-        "| > Banco conectado!"
-    );
+    },
+    max: process.env.VERCEL ? 1 : 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000
 });
 
 db.on("error", (err) => {
-    console.log(
-        "| > Erro BD:",
-        err.message
-    );
+    console.error("| > Erro BD:", err.message);
 });
 
 export default db;

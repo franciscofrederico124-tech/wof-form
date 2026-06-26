@@ -21,7 +21,7 @@ async function init() {
 
     console.log("| > Tabela configurada! ");
   } catch (err) {
-    console.log("| > Erro ao configurar tabela", err.message);
+    console.log("| > Erro ao configurar tabela", err);
   } 
 }
 

@@ -12,6 +12,7 @@ import login from "./src/routes/login.js";
 import reset from "./src/config/reset.js";
 import ping from "./src/routes/ping.js";
 
+init();
 dotenv.config();
 
 const app = express();
@@ -63,11 +64,6 @@ app.post("/system/access", login);
 app.get("/system/dashboard", dashboard);
 app.get("/system/reset_db", reset);
 
-
-
-(async () => {
-  await init();
-})();
 
 const port = process.env.PORT;
 
