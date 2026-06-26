@@ -16,9 +16,11 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = process.env.ORIGIN ? process.env.ORIGIN.trim().split(",") : "*";
+
 app.use(
   cors({
-    origin: process.env.ORIGIN.trim().split(","),
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -33,6 +35,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60,
+      secure: process.env.NODE_ENV === "production"
     },
   })
 );
@@ -55,33 +58,33 @@ app.use(express.static("public"));
 app.set("view engine", "hbs");
 app.set("views", "./src/views");
 
+app.use(async (req, res, next) => {
+  try {
+    await init();
+    next();
+  } catch (err) {
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 app.get("/ping", ping);
 app.post("/register", register);
 app.get("/system/access", access);
 app.post("/system/access", login);
-
 app.get("/system/dashboard", dashboard);
 app.get("/system/reset_db", reset);
 
 app.get('*', (req, res) => {
+  if (req.path === '/ping') {
+    return res.status(200).send("pong");
+  }
   res.redirect('/ping');
 });
 
-(async () => {
-  await init();
-})();
+const port = process.env.PORT || 3000;
 
-const port = process.env.PORT;
-
-app.listen(port, () => {
-  console.log(`
-|••••••••••••••••••••••••••••••
-| 
-| > System on in http://127.0.0.1:${port}
-| > Routes
-| > /ping ( get )
-| > /register ( post )
-| > /system/access ( get )
-|••••••••••••••••••••••••••••••
-`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
