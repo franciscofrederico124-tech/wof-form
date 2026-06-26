@@ -14,9 +14,7 @@ export default function Header() {
             <span>
                 Transforme as tuas ideias em projectos reais. Da concepção até à apresentação do projecto!
             </span>
-            <span>
-                Preencha o formulário e garnta sua vaga
-            </span>
+        
         </header>
     )
 }
