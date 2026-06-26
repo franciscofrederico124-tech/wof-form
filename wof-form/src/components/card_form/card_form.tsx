@@ -107,7 +107,7 @@ export default function CardForm() {
                         <div className={style.input}>
                             <label><i className="bi bi-mortarboard"></i></label>
                             <select name="academic_level" defaultValue="" required>
-                                <option value="" disabled>Nível académico</option>
+                                <option value="" disabled>Nível de experiência</option>
                                 <option value="medio">Médio</option>
                                 <option value="universitario">Universitário</option>
                                 <option value="outro">Outro</option>
