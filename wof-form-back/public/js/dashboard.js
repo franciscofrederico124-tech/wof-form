@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("modal-tel").value = student.tel || "";
             document.getElementById("modal-school").value = student.degree_school || "";
             document.getElementById("modal-level").value = student.level || "";
-            document.getElementById("modal-edits").value = student.edit_count !== undefined ? student.edit_count : "0";
+            // document.getElementById("modal-edits").value = student.edit_count !== undefined ? student.edit_count : "0";
 
             if (student.birth_date) {
                 const birth = new Date(student.birth_date);
