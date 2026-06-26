@@ -63,6 +63,10 @@ app.post("/system/access", login);
 app.get("/system/dashboard", dashboard);
 app.get("/system/reset_db", reset);
 
+app.get((req, res) => {
+  res.redirect("/ping");
+})
+
 (async () => {
   await init();
 })();
