@@ -1,21 +1,25 @@
 import { useState } from "react";
 import register from "../../services/register";
 import style from "./card_form.module.css";
+import { pdf } from "@react-pdf/renderer";
+import { FichaInscricaoPdf, DadosInscricao } from "../../services/generateficha";
 
 export default function CardForm() {
     const [feedback, setFeedback] = useState("");
     const [loading, setLoading] = useState(false);
     const [ok, setOk] = useState(false);
 
+    const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+    const [dadosSalvos, setDadosSalvos] = useState<DadosInscricao | null>(null);
+
     async function handleSubmit(e: any) {
         e.preventDefault();
-
         setFeedback("");
         setLoading(true);
 
         const formElements = e.target.elements;
 
-        const data = {
+        const data: DadosInscricao = {
             first_name: formElements.first_name.value,
             last_name: formElements.last_name.value,
             gender: formElements.gender.value,
@@ -29,24 +33,47 @@ export default function CardForm() {
 
         const res = await register(data);
 
-        setLoading(false);
-
         if (res.ok) {
             setFeedback("Inscrição enviada com sucesso!");
+            
+            setDadosSalvos(data);
+
+            try {
+                const doc = <FichaInscricaoPdf dados={data} />;
+                const blob = await pdf(doc).toBlob();
+                setPdfBlob(blob);
+            } catch (pdfError) {
+                console.error("Erro ao gerar o PDF em segundo plano:", pdfError);
+            }
+
             setTimeout(() => {
                 setOk(true);
             }, 1500);
         } else {
             setFeedback(res.message || "Erro ao enviar formulário");
         }
+        setLoading(false);
+    }
+
+    function handleDownloadPdf() {
+        if (!pdfBlob || !dadosSalvos) return;
+
+        const url = window.URL.createObjectURL(pdfBlob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        const nomeArquivo = `${dadosSalvos.first_name.toLowerCase()}-${dadosSalvos.last_name.toLowerCase()}`;
+        link.download = `ficha-inscricao-${nomeArquivo}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
     }
 
     return (
-        <form
-            autoComplete="off"
-            className={style.card_form}
-            onSubmit={handleSubmit}
-        >
+        <form autoComplete="off" className={style.card_form} onSubmit={handleSubmit}>
             {!ok ? (
                 <>
                     <h2>Formulário de inscrição</h2>
@@ -98,8 +125,8 @@ export default function CardForm() {
                             <label><i className="bi bi-mortarboard"></i></label>
                             <select name="course" defaultValue="" required>
                                 <option value="" disabled>Curso pretendido</option>
-                                <option value="slide">Criação de Slides, Oratória e Retórica</option>
-                                <option value="web">Desenvolvimento Web</option>
+                                <option value="slide"> Desenvolvimento de Slides </option>
+                                <option value="web">Desenvolvimento Web Front-End</option>
                                 <option value="iot">Desenvolvimento de sistemas IOT</option>
                             </select>
                         </div>
@@ -118,20 +145,16 @@ export default function CardForm() {
                             <label><i className="bi bi-code-slash"></i></label>
                             <select name="level" defaultValue="" required>
                                 <option value="" disabled>Nível de experiência</option>
-                                <option value="junior">Júnior</option>
-                                <option value="pleno">Pleno</option>
-                                <option value="senior">Sénior</option>
+                                <option value="junior">Iniciante</option>
+                                <option value="pleno">Intermediário</option>
+                                <option value="senior">Avançado</option>
                             </select>
                         </div>
                     </section>
 
-                    {feedback && (
-                        <div className={style.feedback}>
-                            {feedback}
-                        </div>
-                    )}
+                    {feedback && <div className={style.feedback}>{feedback}</div>}
 
-                    <button disabled={loading} className={style.submit_btn}>
+                    <button type="submit" disabled={loading} className={style.submit_btn}>
                         {loading ? "Enviando..." : "Concluir inscrição"}
                     </button>
                 </>
@@ -143,6 +166,15 @@ export default function CardForm() {
                     <span className={style.theme}>
                         Tão logo, receberá um convite para se juntar à comunidade oficial
                     </span>
+
+                    <button
+                        type="button"
+                        className={style.submit_btn}
+                        onClick={handleDownloadPdf}
+                        disabled={!pdfBlob}
+                    >
+                        {!pdfBlob ? "A carregar PDF..." : "Gerar ficha de inscrição ( PDF )"}
+                    </button>
                 </div>
             )}
         </form>
