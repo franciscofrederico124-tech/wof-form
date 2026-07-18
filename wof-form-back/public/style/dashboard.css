@@ -73,6 +73,63 @@ body {
     background-color: var(--danger-hover);
 }
 
+/* Painel de Indicadores Gerais */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-box {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--accent);
+}
+
+.stat-box.total-geral {
+    border-left: 4px solid var(--success);
+    background: linear-gradient(to right, #fafffa, var(--surface));
+}
+
+.stat-box h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Secções Dinâmicas de Cursos */
+.course-section {
+    margin-bottom: 3rem;
+}
+
+.course-section-title {
+    font-size: 1.35rem;
+    color: var(--text-main);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.course-section-title small {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: normal;
+}
+
 .students-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -152,6 +209,7 @@ body {
     font-size: 3rem;
 }
 
+/* Estilos do Modal */
 .modal-overlay {
     position: fixed;
     top: 0;
