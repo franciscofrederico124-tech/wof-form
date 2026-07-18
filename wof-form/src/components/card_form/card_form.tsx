@@ -12,6 +12,28 @@ export default function CardForm() {
     const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
     const [dadosSalvos, setDadosSalvos] = useState<DadosInscricao | null>(null);
 
+    // Função responsável apenas por forçar o download do arquivo
+    function dispararDownload(blob: Blob, primeiroNome: string, ultimoNome: string) {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+
+        const nomeArquivo = `${primeiroNome.toLowerCase()}-${ultimoNome.toLowerCase()}`;
+        link.download = `ficha-inscricao-${nomeArquivo}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Função chamada quando o utilizador clica manualmente no botão da tela de sucesso
+    function handleDownloadPdf() {
+        if (!pdfBlob || !dadosSalvos) return;
+        dispararDownload(pdfBlob, dadosSalvos.first_name, dadosSalvos.last_name);
+    }
+
     async function handleSubmit(e: any) {
         e.preventDefault();
         setFeedback("");
@@ -35,41 +57,30 @@ export default function CardForm() {
 
         if (res.ok) {
             setFeedback("Inscrição enviada com sucesso!");
-            
             setDadosSalvos(data);
 
             try {
                 const doc = <FichaInscricaoPdf dados={data} />;
                 const blob = await pdf(doc).toBlob();
                 setPdfBlob(blob);
-            } catch (pdfError) {
-                console.error("Erro ao gerar o PDF em segundo plano:", pdfError);
-            }
 
-            setTimeout(() => {
-                setOk(true);
-            }, 1500);
+                // Ativa a tela de sucesso e dispara o download automático após 1.5 segundos
+                setTimeout(() => {
+                    setOk(true);
+                    dispararDownload(blob, data.first_name, data.last_name);
+                }, 1500);
+
+            } catch (pdfError) {
+                console.error("Erro ao gerar o PDF:", pdfError);
+                // Mesmo com erro no PDF, avança para o ecrã de sucesso
+                setTimeout(() => {
+                    setOk(true);
+                }, 1500);
+            }
         } else {
             setFeedback(res.message || "Erro ao enviar formulário");
         }
         setLoading(false);
-    }
-
-    function handleDownloadPdf() {
-        if (!pdfBlob || !dadosSalvos) return;
-
-        const url = window.URL.createObjectURL(pdfBlob);
-        const link = document.createElement("a");
-        link.href = url;
-
-        const nomeArquivo = `${dadosSalvos.first_name.toLowerCase()}-${dadosSalvos.last_name.toLowerCase()}`;
-        link.download = `ficha-inscricao-${nomeArquivo}.pdf`;
-
-        document.body.appendChild(link);
-        link.click();
-
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
     }
 
     return (
@@ -173,7 +184,7 @@ export default function CardForm() {
                         onClick={handleDownloadPdf}
                         disabled={!pdfBlob}
                     >
-                        {!pdfBlob ? "A carregar PDF..." : "Gerar ficha de inscrição ( PDF )"}
+                        {!pdfBlob ? "A carregar PDF..." : "Descarregar ficha de inscrição ( PDF )"}
                     </button>
                 </div>
             )}
