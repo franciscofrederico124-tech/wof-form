@@ -187,6 +187,9 @@ body {
     margin-top: 1.5rem;
     border-top: 1px solid var(--border);
     padding-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
 }
 
 .view-badge {
@@ -196,6 +199,34 @@ body {
     display: flex;
     align-items: center;
     gap: 0.25rem;
+}
+
+.generate-pdf-btn {
+    width: 100%;
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid var(--accent-light);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.generate-pdf-btn:hover {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+.generate-pdf-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .empty-state {

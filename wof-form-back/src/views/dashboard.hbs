@@ -7,6 +7,8 @@
     <title>Painel do Sistema</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/style/dashboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
 </head>
 
 <body>
@@ -37,7 +39,7 @@
                 <div class="student-info">
                     <h3>{{this.first_name}} {{this.last_name}}</h3>
                     <p class="student-email">
-                        <i class="bi bi-envelope"></i> 
+                        <i class="bi bi-envelope"></i>
                         {{#if this.email}}{{this.email}}{{else}}Sem email{{/if}}
                     </p>
                     <p class="student-email" style="margin-top: 4px;">
@@ -46,6 +48,9 @@
                 </div>
                 <div class="card-footer-info">
                     <span class="view-badge">Ver ficha completa <i class="bi bi-arrow-right-short"></i></span>
+                    <button class="generate-pdf-btn" title="Gerar Ficha de Inscrição">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Gerar Ficha de Inscrição
+                    </button>
                 </div>
             </div>
             {{else}}

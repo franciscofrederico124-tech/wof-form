@@ -8,6 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const coursesContainer = document.getElementById("courses-container");
     const statsContainer = document.getElementById("stats-container");
 
+    // Caminhos das imagens usadas na ficha em PDF (mesma convenção de /style/ e /js/)
+    const LOGO_PATH = "../images/logo.png";
+    const QR_PATH = "../images/qr.png";
+
     // Caso a BD esteja limpa ou vazia
     if (cards.length === 0) {
         rawStudentsGrid.style.display = "block";
@@ -64,7 +68,11 @@ document.addEventListener("DOMContentLoaded", () => {
         coursesGroup[courseName].forEach(card => {
             // Clonar o nó para poder atribuir eventos isolados sem mutar a stack invisível do HBS
             const clonedCard = card.cloneNode(true);
-            clonedCard.addEventListener("click", () => openStudentModal(clonedCard));
+            clonedCard.addEventListener("click", (e) => {
+                // Não abrir o modal se o clique tiver sido no botão de gerar PDF
+                if (e.target.closest(".generate-pdf-btn")) return;
+                openStudentModal(clonedCard);
+            });
             courseGrid.appendChild(clonedCard);
         });
 
@@ -161,4 +169,284 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // ==========================================================
+    // GERAÇÃO DA FICHA DE INSCRIÇÃO EM PDF (client-side, pdfmake)
+    // ==========================================================
+
+    // Converte uma imagem de uma URL para Base64 (necessário para o pdfmake)
+    async function toDataURL(url) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Falha ao carregar imagem: ${url}`);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    // Formata a data de nascimento (aceita "YYYY-MM-DD" ou ISO completo)
+    function formatarDataNascimento(birthDate) {
+        if (!birthDate) return "Não informado";
+        const data = new Date(birthDate);
+        if (isNaN(data.getTime())) return "Não informado";
+        return data.toLocaleDateString("pt-PT");
+    }
+
+    async function gerarFichaInscricaoPDF(student, btn) {
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> A gerar...';
+
+        try {
+            const [logoData, qrData] = await Promise.all([
+                toDataURL(LOGO_PATH),
+                toDataURL(QR_PATH)
+            ]);
+
+            // --- Preenchimento correto dos campos, com fallback seguro ---
+            const firstName = student.first_name || "Não informado";
+            const lastName = student.last_name || "Não informado";
+            const gender = student.gender || "Não informado";
+            const birthDate = formatarDataNascimento(student.birth_date);
+            const tel = student.tel || "Não informado";
+            const email = student.email || "Não Fornecido";
+            const curso = student.degree_school || "Não informado";
+            const nivel = student.level || "Não informado";
+            const registoId = student.id || "N/A";
+
+            const cellLabel = (text) => ({ text, style: "cellLabel" });
+            const cellValue = (text) => ({ text: text || "-", style: "cellValue" });
+
+            const docDefinition = {
+                pageSize: "A4",
+                pageMargins: [35, 40, 35, 30],
+                defaultStyle: { fontSize: 10, color: "#334155" },
+                styles: {
+                    logoTitle: { fontSize: 22, bold: true, color: "#0f172a" },
+                    logoSubtitle: { fontSize: 8, color: "#64748b" },
+                    docTitle: { fontSize: 18, bold: true, color: "#1e3a8a", alignment: "right" },
+                    docSubtitle: { fontSize: 9, bold: true, color: "#d97706", alignment: "right" },
+                    alertTitle: { fontSize: 10, bold: true, color: "#1e3a8a", margin: [0, 0, 0, 3] },
+                    alertText: { fontSize: 9.5, color: "#334155", lineHeight: 1.3 },
+                    sectionTitle: { fontSize: 10.5, bold: true, color: "#1e3a8a", margin: [0, 14, 0, 10] },
+                    cellLabel: { fontSize: 7.5, bold: true, color: "#64748b" },
+                    cellValue: { fontSize: 10, bold: true, color: "#0f172a", margin: [0, 3, 0, 0] },
+                    paymentLabel: { fontSize: 8.5, bold: true, color: "#9a3412" },
+                    paymentValue: { fontSize: 20, bold: true, color: "#ea580c", margin: [0, 2, 0, 0] },
+                    bankSectionTitle: { fontSize: 8.5, bold: true, color: "#ea580c" },
+                    bankLabel: { fontSize: 9.5, bold: true, color: "#64748b" },
+                    bankValue: { fontSize: 9.5, bold: true, color: "#334155" },
+                    bankValueHighlight: { fontSize: 11, bold: true, color: "#0f172a" },
+                    bankValuePhone: { fontSize: 9.5, bold: true, color: "#1e3a8a" },
+                    instructionText: { fontSize: 9.5, color: "#334155", margin: [0, 0, 0, 8], lineHeight: 1.3 },
+                    footer: { fontSize: 8, color: "#94a3b8", alignment: "right" },
+                    idBadge: { fontSize: 7, color: "#94a3b8", alignment: "right" }
+                },
+                content: [
+                    // Cabeçalho
+                    {
+                        columns: [
+                            {
+                                width: "auto",
+                                columns: [
+                                    { image: logoData, width: 50, height: 50 },
+                                    {
+                                        width: "auto",
+                                        margin: [8, 0, 0, 0],
+                                        stack: [
+                                            { text: "WOF-HUB", style: "logoTitle" },
+                                            { text: "PLANO DE FÉRIAS", style: "logoSubtitle" }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                width: "*",
+                                stack: [
+                                    { text: "Ficha de Inscrição", style: "docTitle" },
+                                    { text: "CONFIRMAÇÃO PENDENTE", style: "docSubtitle" },
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        canvas: [{ type: "line", x1: 0, y1: 0, x2: 525, y2: 0, lineWidth: 2, lineColor: "#1e3a8a" }],
+                        margin: [0, 10, 0, 16]
+                    },
+
+                    // Caixa de alerta
+                    {
+                        table: {
+                            widths: ["*"],
+                            body: [[{
+                                stack: [
+                                    { text: "Confirmação de Vaga Pendente", style: "alertTitle" },
+                                    { text: "O seu formulário foi recebido com sucesso. Para garantir e efetivar o seu lugar na turma, conclua o pagamento da taxa de inscrição descrita abaixo.", style: "alertText" }
+                                ],
+                                fillColor: "#f1f5f9",
+                                border: [false, false, false, false]
+                            }]]
+                        },
+                        layout: {
+                            hLineWidth: () => 0,
+                            vLineWidth: (i) => (i === 0 ? 4 : 0),
+                            vLineColor: () => "#1d4ed8",
+                            paddingLeft: () => 12, paddingRight: () => 12,
+                            paddingTop: () => 10, paddingBottom: () => 10
+                        },
+                        margin: [0, 0, 0, 4]
+                    },
+
+                    // Dados do Candidato
+                    { text: "DADOS DO CANDIDATO", style: "sectionTitle" },
+                    {
+                        table: {
+                            widths: ["*", "*"],
+                            body: [
+                                [
+                                    { stack: [cellLabel("PRIMEIRO NOME"), cellValue(firstName)], margin: [6, 6, 6, 6] },
+                                    { stack: [cellLabel("ÚLTIMO NOME"), cellValue(lastName)], margin: [6, 6, 6, 6] }
+                                ],
+                                [
+                                    { stack: [cellLabel("GÉNERO"), cellValue(gender)], margin: [6, 6, 6, 6] },
+                                    { stack: [cellLabel("DATA DE NASCIMENTO"), cellValue(birthDate)], margin: [6, 6, 6, 6] }
+                                ],
+                                [
+                                    { stack: [cellLabel("TELEMÓVEL / WHATSAPP"), cellValue(tel)], margin: [6, 6, 6, 6] },
+                                    { stack: [cellLabel("E-MAIL (OPCIONAL)"), cellValue(email)], margin: [6, 6, 6, 6] }
+                                ]
+                            ]
+                        },
+                        layout: {
+                            hLineWidth: () => 1, vLineWidth: () => 1,
+                            hLineColor: () => "#e2e8f0", vLineColor: () => "#e2e8f0",
+                            paddingLeft: () => 0, paddingRight: () => 0, paddingTop: () => 0, paddingBottom: () => 0
+                        },
+                        margin: [0, 0, 0, 12]
+                    },
+
+                    // Dados Académicos e Curso
+                    { text: "DADOS ACADÉMICOS E CURSO", style: "sectionTitle" },
+                    {
+                        table: {
+                            widths: ["*", "*"],
+                            body: [[
+                                { stack: [cellLabel("CURSO"), cellValue(curso)], margin: [6, 6, 6, 6] },
+                                { stack: [cellLabel("NÍVEL / ANO"), cellValue(nivel)], margin: [6, 6, 6, 6] }
+                            ]]
+                        },
+                        layout: {
+                            hLineWidth: () => 1, vLineWidth: () => 1,
+                            hLineColor: () => "#e2e8f0", vLineColor: () => "#e2e8f0",
+                            paddingLeft: () => 0, paddingRight: () => 0, paddingTop: () => 0, paddingBottom: () => 0
+                        },
+                        margin: [0, 0, 0, 12]
+                    },
+
+                    // Dados de Pagamento
+                    { text: "DADOS DE PAGAMENTO", style: "sectionTitle" },
+                    {
+                        table: {
+                            widths: ["*"],
+                            body: [[{
+                                stack: [
+                                    { text: "Valor da Taxa de Inscrição:", style: "paymentLabel" },
+                                    { text: "5.550,00 Kzs", style: "paymentValue" }
+                                ],
+                                fillColor: "#fff7ed",
+                                margin: [10, 10, 10, 10]
+                            }]]
+                        },
+                        layout: "noBorders",
+                        margin: [0, 0, 0, 10]
+                    },
+                    {
+                        columns: [
+                            {
+                                width: "75%",
+                                table: {
+                                    widths: ["*"],
+                                    body: [[{
+                                        stack: [
+                                            { text: "COORDENADAS BANCÁRIAS PARA DEPÓSITO/TRANSFERÊNCIA", style: "bankSectionTitle", margin: [0, 0, 0, 8] },
+                                            { columns: [{ text: "Nome:", style: "bankLabel", width: 55 }, { text: "José Francisco Conde", style: "bankValue" }], margin: [0, 0, 0, 6] },
+                                            { columns: [{ text: "Banco:", style: "bankLabel", width: 55 }, { text: "BAI", style: "bankValue" }], margin: [0, 0, 0, 6] },
+                                            { columns: [{ text: "IBAN:", style: "bankLabel", width: 55 }, { text: "0040.0000.9496.1977.1013.8", style: "bankValueHighlight" }], margin: [0, 0, 0, 6] },
+                                            { columns: [{ text: "Express:", style: "bankLabel", width: 55 }, { text: "+244 924 605 394", style: "bankValuePhone" }] }
+                                        ],
+                                        margin: [10, 10, 10, 10]
+                                    }]]
+                                },
+                                layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => "#e2e8f0", vLineColor: () => "#e2e8f0" }
+                            },
+                            {
+                                width: "25%",
+                                table: {
+                                    widths: ["*"],
+                                    body: [[{
+                                        stack: [
+                                            { image: qrData, width: 65, height: 65, alignment: "center" },
+                                            { text: "Aceda ao\nSite Oficial", fontSize: 7.5, color: "#64748b", alignment: "center", bold: true, margin: [0, 4, 0, 0] }
+                                        ],
+                                        margin: [8, 8, 8, 8]
+                                    }]]
+                                },
+                                layout: { hLineWidth: () => 1, vLineWidth: (i) => (i === 0 ? 0 : 1), hLineColor: () => "#e2e8f0", vLineColor: () => "#e2e8f0" }
+                            }
+                        ]
+                    },
+
+                    { text: "Página 1 de 2", style: "footer", margin: [0, 20, 0, 0] },
+
+                    // Página 2
+                    { text: "INSTRUÇÕES DE CONFIRMAÇÃO:", style: "sectionTitle", pageBreak: "before" },
+                    {
+                        table: {
+                            widths: ["*"],
+                            body: [[{
+                                stack: [
+                                    { text: "1. Realize o pagamento por transferência (Multicaixa / Mobile Banking) ou depósito bancário.", style: "instructionText" },
+                                    { text: "2. Certifique-se de guardar o comprovativo da operação bancária realizada.", style: "instructionText" },
+                                    { text: "3. Submeta ou envie o comprovativo juntamente com este documento para efetivar a sua matrícula.", style: "instructionText", margin: [0, 0, 0, 0] }
+                                ],
+                                fillColor: "#f8fafc",
+                                margin: [12, 12, 12, 12]
+                            }]]
+                        },
+                        layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => "#cbd5e1", vLineColor: () => "#cbd5e1" }
+                    },
+                    { text: "Página 2 de 2", style: "footer", margin: [0, 20, 0, 0] }
+                ]
+            };
+
+            const fileName = `Ficha_Inscricao_${firstName}_${lastName}`
+                .replace(/[^a-zA-Z0-9_ÀÁÂÃÉÊÍÓÔÕÚÇàáâãéêíóôõúç]/g, "")
+                .replace(/\s+/g, "_") + ".pdf";
+
+            pdfMake.createPdf(docDefinition).download(fileName);
+        } catch (err) {
+            console.error("Erro ao gerar ficha em PDF:", err);
+            alert("Não foi possível gerar a ficha em PDF. Tente novamente.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    }
+
+    // Delegação de evento para o botão "Gerar Ficha de Inscrição" (cobre cards clonados dinamicamente)
+    document.body.addEventListener("click", async (e) => {
+        const pdfBtn = e.target.closest(".generate-pdf-btn");
+        if (!pdfBtn) return;
+
+        e.stopPropagation();
+        const card = pdfBtn.closest(".student-card");
+        const rawData = card?.getAttribute("data-student");
+        if (!rawData) return;
+
+        const student = JSON.parse(rawData);
+        await gerarFichaInscricaoPDF(student, pdfBtn);
+    });
 });
