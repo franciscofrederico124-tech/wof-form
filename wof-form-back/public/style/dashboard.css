@@ -229,6 +229,35 @@ body {
     cursor: not-allowed;
 }
 
+/* Botão de remover inscrição */
+.remove-card-btn {
+    width: 100%;
+    background: #fef2f2;
+    color: var(--danger);
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.remove-card-btn:hover {
+    background: var(--danger);
+    color: #ffffff;
+    border-color: var(--danger);
+}
+
+.remove-card-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;

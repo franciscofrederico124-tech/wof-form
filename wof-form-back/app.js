@@ -10,6 +10,7 @@ import access from "./src/routes/access.js";
 import dashboard from "./src/routes/dashboard.js";
 import login from "./src/routes/login.js";
 import reset from "./src/config/reset.js";
+import remove from "./src/routes/remove.js"
 import ping from "./src/routes/ping.js";
 
 init();
@@ -58,6 +59,7 @@ app.set("views", "./src/views");
 
 app.get("/ping", ping);
 app.post("/register", register);
+app.post("/remove", remove);
 app.get("/system/access", access);
 app.post("/system/access", login);
 

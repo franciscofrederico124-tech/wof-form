@@ -68,11 +68,68 @@ document.addEventListener("DOMContentLoaded", () => {
         coursesGroup[courseName].forEach(card => {
             // Clonar o nó para poder atribuir eventos isolados sem mutar a stack invisível do HBS
             const clonedCard = card.cloneNode(true);
+
             clonedCard.addEventListener("click", (e) => {
-                // Não abrir o modal se o clique tiver sido no botão de gerar PDF
-                if (e.target.closest(".generate-pdf-btn")) return;
+                // Não abrir o modal se o clique tiver sido no PDF ou no remover
+                if (e.target.closest(".generate-pdf-btn") || e.target.closest(".remove-card-btn")) return;
                 openStudentModal(clonedCard);
             });
+
+            // Botão "Gerar Ficha de Inscrição"
+            const pdfBtn = clonedCard.querySelector(".generate-pdf-btn");
+            if (pdfBtn) {
+                pdfBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const student = JSON.parse(clonedCard.getAttribute("data-student"));
+                    gerarFichaInscricaoPDF(student, pdfBtn);
+                });
+            }
+
+            // Botão "Remover Inscrição"
+            const removeBtn = clonedCard.querySelector(".remove-card-btn");
+            if (removeBtn) {
+                removeBtn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+
+                    const student = JSON.parse(clonedCard.getAttribute("data-student"));
+                    // alert(student.id);
+                    const confirmRemove = confirm(
+                        `Tem a certeza de que deseja remover o registo de ${student.first_name} ${student.last_name}?`
+                    );
+                    if (!confirmRemove) return;
+
+                    const originalHTML = removeBtn.innerHTML;
+                    removeBtn.disabled = true;
+                    removeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> A remover...';
+
+                    try {
+                        const res = await fetch(`/remove`, {
+                            method: "POST",
+                            credentials: "include",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                id: student.id,
+                            })
+                        });
+                        const json = await res.json();
+
+                        if (json.success) {
+                            clonedCard.remove();
+                            window.location.href = "#";
+                        } else {
+                            alert(json.message || "Erro ao remover o registo.");
+                            removeBtn.disabled = false;
+                            removeBtn.innerHTML = originalHTML;
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("Erro de rede ao tentar remover o registo.");
+                        removeBtn.disabled = false;
+                        removeBtn.innerHTML = originalHTML;
+                    }
+                });
+            }
+
             courseGrid.appendChild(clonedCard);
         });
 
@@ -409,44 +466,43 @@ document.addEventListener("DOMContentLoaded", () => {
                             body: [[{
                                 stack: [
                                     { text: "1. Realize o pagamento por transferência (Multicaixa / Mobile Banking) ou depósito bancário.", style: "instructionText" },
-                                    { text: "2. Certifique-se de guardar o comprovativo da operação bancária realizada.", style: "instructionText" },
-                                    { text: "3. Submeta ou envie o comprovativo juntamente com este documento para efetivar a sua matrícula.", style: "instructionText", margin: [0, 0, 0, 0] }
+                                    { text: "2. Guarde o comprovativo de pagamento, pois será solicitado na confirmação da vaga.", style: "instructionText" },
+                                    { text: "3. Após o pagamento, aguarde o contacto da nossa equipa para validação do registo.", style: "instructionText" },
+                                    { text: "4. Em caso de dúvida, contacte-nos através do número Express indicado nesta ficha.", style: "instructionText" }
                                 ],
                                 fillColor: "#f8fafc",
-                                margin: [12, 12, 12, 12]
+                                border: [false, false, false, false]
                             }]]
                         },
-                        layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => "#cbd5e1", vLineColor: () => "#cbd5e1" }
+                        layout: {
+                            hLineWidth: () => 0,
+                            vLineWidth: (i) => (i === 0 ? 4 : 0),
+                            vLineColor: () => "#ea580c",
+                            paddingLeft: () => 12, paddingRight: () => 12,
+                            paddingTop: () => 10, paddingBottom: () => 10
+                        },
+                        margin: [0, 0, 0, 20]
                     },
-                    { text: "Página 2 de 2", style: "footer", margin: [0, 20, 0, 0] }
+                    {
+                        text: `Registo Nº: ${registoId}`,
+                        style: "idBadge",
+                        margin: [0, 0, 0, 4]
+                    },
+                    {
+                        text: "Este documento não substitui o comprovativo de pagamento. Válido apenas após confirmação da equipa WOF-HUB.",
+                        style: "footer",
+                        alignment: "left"
+                    }
                 ]
             };
 
-            const fileName = `Ficha_Inscricao_${firstName}_${lastName}`
-                .replace(/[^a-zA-Z0-9_ÀÁÂÃÉÊÍÓÔÕÚÇàáâãéêíóôõúç]/g, "")
-                .replace(/\s+/g, "_") + ".pdf";
-
-            pdfMake.createPdf(docDefinition).download(fileName);
+            pdfMake.createPdf(docDefinition).download(`Ficha_Inscricao_${firstName}_${lastName}.pdf`);
         } catch (err) {
-            console.error("Erro ao gerar ficha em PDF:", err);
+            console.error("Erro ao gerar PDF:", err);
             alert("Não foi possível gerar a ficha em PDF. Tente novamente.");
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalHTML;
         }
     }
-
-    // Delegação de evento para o botão "Gerar Ficha de Inscrição" (cobre cards clonados dinamicamente)
-    document.body.addEventListener("click", async (e) => {
-        const pdfBtn = e.target.closest(".generate-pdf-btn");
-        if (!pdfBtn) return;
-
-        e.stopPropagation();
-        const card = pdfBtn.closest(".student-card");
-        const rawData = card?.getAttribute("data-student");
-        if (!rawData) return;
-
-        const student = JSON.parse(rawData);
-        await gerarFichaInscricaoPDF(student, pdfBtn);
-    });
 });
